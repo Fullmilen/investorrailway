@@ -33,6 +33,11 @@ def status():
         total=sum(v['total_investido'] for v in investidores.values())
         return jsonify({'total_acumulado':total,'objetivo':OBJETIVO})
 
+@app.route('/lista')
+def lista():
+    with lock:
+        return jsonify(investidores)
+
 if __name__=='__main__':
     port=int(os.environ.get('PORT',5000))
     app.run(host='0.0.0.0', port=port)
