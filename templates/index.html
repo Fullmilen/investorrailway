@@ -10,7 +10,8 @@
         <h1>Seja um Investidor!</h1>
         <p>Capital inicial: R$ {{ "{:,.2f}".format(capital) }}</p>
 
-        <form id="investForm">
+        <!-- FORMULÁRIO CORRIGIDO -->
+        <form id="investForm" onsubmit="event.preventDefault(); enviarInvestimento();">
             <input type="text" id="nome" placeholder="Digite seu nome" required>
             <input type="number" id="valor" min="0" max="{{ capital }}" placeholder="Valor a investir" required>
             <button type="submit">Investir</button>
@@ -22,6 +23,7 @@
             <span id="progressText">R$ 0,00 / R$ {{ "{:,.2f}".format(objetivo) }}</span>
         </div>
 
+        <!-- TABELA DE INVESTIDORES -->
         <h3>Investidores</h3>
         <table border="1" id="tabelaInvestidores">
             <thead>
@@ -35,44 +37,9 @@
         </table>
     </div>
 
-    <script>
-        // Variáveis vindas do Flask
-        window.OBJETIVO = {{ objetivo }};
-        window.CAPITAL_INICIAL = {{ capital }};
+    <!-- REMOVIDO script duplicado (ERA O PROBLEMA) -->
 
-        function formatarMoeda(valor) {
-            return "R$ " + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        }
-
-        async function atualizarStatus() {
-            const res = await fetch('/status');
-            const data = await res.json();
-
-            // Atualiza barra de progresso
-            const barra = document.getElementById('progressBar');
-            barra.value = data.total_acumulado;
-            barra.max = data.objetivo;
-            document.getElementById('progressText').innerText =
-                `${formatarMoeda(data.total_acumulado)} / ${formatarMoeda(data.objetivo)}`;
-
-            // Atualiza tabela de investidores
-            const tbody = document.querySelector('#tabelaInvestidores tbody');
-            tbody.innerHTML = "";
-            for (const [nome, info] of Object.entries(data.investidores)) {
-                const row = `<tr>
-                    <td>${nome}</td>
-                    <td>${formatarMoeda(info.total_investido)}</td>
-                    <td>${formatarMoeda(info.saldo)}</td>
-                </tr>`;
-                tbody.innerHTML += row;
-            }
-        }
-
-        // Atualiza automaticamente a cada 2 segundos
-        setInterval(atualizarStatus, 2000);
-        window.onload = atualizarStatus;
-    </script>
-
+    <!-- script.js agora cuida de tudo -->
     <script src="/static/script.js"></script>
 </body>
 </html>
