@@ -18,44 +18,44 @@ async function enviarInvestimento() {
 
     if (!resp.ok) {
         alert(data.erro || "Erro ao investir");
+        return;
     }
-
-    atualizarBarra();
-    atualizarLista();
 }
 
-// Atualizar barra de progresso
-async function atualizarBarra() {
+// Atualiza o status completo da página
+async function atualizarStatus() {
     const resp = await fetch("/status");
     const data = await resp.json();
 
-    const porcentagem = (data.total_acumulado / data.objetivo) * 100;
+    // Atualizar barra de progresso
+    const barra = document.getElementById("progressBar");
+    barra.value = data.total_acumulado;
+    barra.max = data.objetivo;
 
-    document.getElementById("barra").style.width = porcentagem + "%";
-    document.getElementById("total").innerText = data.total_acumulado.toFixed(2);
-}
+    document.getElementById("progressText").textContent =
+        `R$ ${data.total_acumulado.toLocaleString('pt-BR', {minimumFractionDigits: 2})} / ` +
+        `R$ ${data.objetivo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-// Atualizar lista de investidores
-async function atualizarLista() {
-    const resp = await fetch("/lista");
-    const data = await resp.json();
+    // Atualizar tabela de investidores
+    const tbody = document.querySelector("#tabelaInvestidores tbody");
+    tbody.innerHTML = "";
 
-    const lista = document.getElementById("lista-investidores");
-    lista.innerHTML = ""; // limpa antes de recriar
+    const investidores = data.investidores;
 
-    for (const nome in data) {
-        const item = document.createElement("li");
-        item.innerHTML = `
-            <strong>${nome}</strong> — 
-            Investido: R$ ${data[nome].total_investido.toFixed(2)} —
-            Saldo: R$ ${data[nome].saldo.toFixed(2)}
+    for (const nome in investidores) {
+        const info = investidores[nome];
+
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+            <td>${nome}</td>
+            <td>R$ ${info.total_investido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            <td>R$ ${info.saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
         `;
-        lista.appendChild(item);
+
+        tbody.appendChild(linha);
     }
 }
 
-// Atualiza tudo ao carregar a página
-window.onload = () => {
-    atualizarBarra();
-    atualizarLista();
-};
+// Atualização automática
+setInterval(atualizarStatus, 2000);
+window.onload = atualizarStatus;
